@@ -1,0 +1,26 @@
+<!-- templates/home.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CandleBot</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='favicon.png') }}" type="image/x-icon"> <!-- Favicon link -->
+</head>
+<body>
+    <div class="container">
+        <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" class="logo">
+        <div class="button-container">
+            <div class="button-wrapper">
+                <a href="/login" class="button login-button">LOGIN</a>
+                <span class="small-text">EXISTING USERS</span><br>
+            </div>
+            <div class="button-wrapper">
+                <a href="/register" class="button register-button">REGISTER</a>
+                <span class="small-text">NEW USERS</span><br>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

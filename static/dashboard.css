@@ -1,0 +1,99 @@
+body {
+    font-family: 'Roboto';
+    font-size: 20pt;
+    margin: 0;
+    padding: 0;
+    align-items: center;
+    justify-content: center;
+    background-color: #ffffff
+}
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #f0f0f0;
+    color: rgb(0, 0, 0);
+    padding: 10px 10px;
+    font-size: 20pt;
+}
+
+.navbar .minilogo {
+    height: 70px;
+    font-size: 20pt;
+}
+
+.nav-links {
+    display: flex;
+    font-family: Roboto;
+    padding: 10px 10px;
+    gap: 20px;
+    font-size: 20pt;
+}
+
+.nav-links a {
+    color: rgb(0, 0, 0);
+    text-decoration: none;
+}
+
+.nav-links :hover {
+    color: #1de184;
+    text-decoration: none;
+}
+
+.logout-button {
+    background-color: rgb(255, 109, 109);
+    padding: 5px 10px;
+    border: none;
+    color: white;
+    cursor: pointer;
+    border-radius: 10px;
+}
+
+.search-container {
+    display: flex;
+    align-items: center;
+    padding: 20px;
+    gap: 5px;
+    justify-content: center;
+    
+
+}
+
+.search-container input[type="text"],
+.search-container select {
+    font-size: 14pt;
+    margin-right: 10px;
+    padding: 5px;
+    
+}
+
+.dates {
+    font-family: Roboto;
+    font-size: 14pt;
+    margin-top: 15px;
+    margin-left: 5px;
+    margin-right: 5px;
+    height: 24pt;
+    align-items: center;
+}
+
+.search-button{   
+    padding: 5px 5px;
+    background-color: #ee145c;
+    font-size: 16pt;
+    font-family: Roboto;
+    color: white;
+    width: 100px;
+
+}
+
+#chart{
+    margin-top: 20px;
+    align-content: center;
+    justify-content: center;
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+
+}
