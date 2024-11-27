@@ -10,7 +10,7 @@
 <body>
     <div class="navbar">
         <img src="{{ url_for('static', filename='logo.png') }}" alt="CandleBot Logo" class="minilogo">
-        <span>Hi, {{ full_name }}!</span>
+        <p class="welcome">Hi, {{ full_name }}</p>
         <div class="nav-links">
             <a href="/dashboard">Search</a>
             <a href="/portfolio">Portfolio</a>
@@ -20,49 +20,155 @@
         </div>
     </div>
 
-    <div class="search-container">
-        <input type="text" id="search-bar" placeholder="Search stocks...">
-        <p>Period :</p>
-        <select id="period-selector">
-            <option value="max">Full</option>
-            <option value="None">By Dates</option>
-            <option value="1d">1 day</option>
-            <option value="5d">5 day</option>
-            <option value="1mo">1 month</option>
-            <option value="3mo">3 months</option>
-            <option value="6mo">6 months</option>
-            <option value="1y">1 year</option>
-            <option value="2y">2 years</option>
-            <option value="3y">5 years</option>
-            <option value="10y">10 years</option>
-            <option value="ytd">Year2Date</option>
-        </select>
-        <p>Interval :</p>
-        <select id="interval-selector">
-            <option value="1d">Daily</option>
-            <option value="1wk">Weekly</option>
-            <option value="1mo">Monthly</option>
-            <option value="1m">1 Minute</option>
-            <option value="2m">2 Minutes</option>
-            <option value="5m">5 Minutes</option>
-            <option value="15m">15 Minutes</option>
-            <option value="30m">30 Minutes</option>
-            <option value="1h">Hourly</option>
-            <option value="5d">5 Days</option>
-            <option value="3mo">3 Months</option>
-        </select>
-        <div id="date-inputs" style="display: none;">
-            <p>Start-Date : </p>
-            <input type="date" id="start-date" class="dates">
-            <p>End-Date : </p>
-            <input type="date" id="end-date" class="dates">
+    <div class="dashboard-container">
+        <div class="left-column">
+            <div class="search-container">
+                <input type="text" id="search-bar" placeholder="Search stocks...">
+                <button id="search-button" class="search-button">Search</button>
+            </div>
+            <div class="selector-container">
+                <p style="font-size: small;">Period :</p>
+                <select id="period-selector">
+                    <option value="max">Full</option>
+                    <option value="None">By Dates</option>
+                    <option value="1d">1 day</option>
+                    <option value="5d">5 day</option>
+                    <option value="1mo">1 month</option>
+                    <option value="3mo">3 months</option>
+                    <option value="6mo">6 months</option>
+                    <option value="1y">1 year</option>
+                    <option value="2y">2 years</option>
+                    <option value="3y">5 years</option>
+                    <option value="10y">10 years</option>
+                    <option value="ytd">Year2Date</option>
+                </select>
+
+                <p style="font-size: small;">Interval :</p>
+                <select id="interval-selector">
+                    <option value="1d">Daily</option>
+                    <option value="1wk">Weekly</option>
+                    <option value="1mo">Monthly</option>
+                    <option value="1m">1 Minute</option>
+                    <option value="2m">2 Minutes</option>
+                    <option value="5m">5 Minutes</option>
+                    <option value="15m">15 Minutes</option>
+                    <option value="30m">30 Minutes</option>
+                    <option value="1h">Hourly</option>
+                    <option value="5d">5 Days</option>
+                    <option value="3mo">3 Months</option>
+                </select>
+            </div>
+            
+            <!-- New container for date inputs -->
+
+            <div id="date-inputs" style="display: none;">
+                <div class="date-input-row">
+                    <p style="font-size: small;">Start-Date:</p>
+                    <input type="date" id="start-date" class="dates">
+                    <p style="font-size: small;">End-Date:</p>
+                    <input type="date" id="end-date" class="dates">
+                </div>
+            </div>
+
+            <div id="chart"></div>
         </div>
-        <button id="search-button" class ="search-button">Search</button>
+
+        <div class="right-column">
+            <!-- Right column content will go here -->
+        </div>
     </div>
 
-    <div id="chart"></div>
-
     <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const searchBar = document.getElementById('search-bar');
+            const suggestionBox = document.createElement('div');
+            suggestionBox.setAttribute('id', 'suggestion-box');
+            document.body.appendChild(suggestionBox);
+            
+            let currentIndex = -1; // Track the currently highlighted suggestion
+
+            // Fetch stock names
+            fetch('/get_stock_names')
+                .then(response => response.json())
+                .then(suggestions => {
+                    searchBar.addEventListener('input', function() {
+                        const query = this.value.toLowerCase();
+                        suggestionBox.innerHTML = ''; // Clear previous suggestions
+                        suggestionBox.style.display = 'none'; // Hide if no input
+                        currentIndex = -1; // Reset current index
+
+                        if (query) {
+                            const filteredNames = suggestions.filter(name => name.toLowerCase().includes(query));
+                            filteredNames.forEach((name, index) => {
+                                const [companyName, symbol, market] = name.split('-');
+
+                                const suggestionItem = document.createElement('div');
+                                suggestionItem.style.display = 'flex'; // Use flexbox for layout
+                                suggestionItem.style.justifyContent = 'space-between'; // Space between elements
+                                suggestionItem.style.padding = '5px'; // Padding for better spacing
+                                suggestionItem.style.cursor = 'pointer';
+
+                                // Create a span for company name and symbol
+                                const textContent = document.createElement('span');
+                                textContent.textContent = `${companyName} (${symbol})`; // Format as "Company Name (SYMBOL)"
+                                suggestionItem.appendChild(textContent);
+
+                                // Create a span for market, right-aligned
+                                const marketContent = document.createElement('span');
+                                marketContent.textContent = market; // Market name
+                                marketContent.style.marginLeft = 'auto'; // Push to the right
+                                suggestionItem.appendChild(marketContent);
+                                suggestionItem.onclick = function() {
+                                    searchBar.value = name; // Set the search bar value
+                                    suggestionBox.innerHTML = ''; // Clear suggestions
+                                    suggestionBox.style.display = 'none'; // Hide suggestion box
+                                };
+                                suggestionItem.setAttribute('data-index', index); // Store index for keyboard navigation
+                                suggestionBox.appendChild(suggestionItem);
+                            });
+                            if (filteredNames.length > 0) {
+                                // Position the suggestion box below the search bar
+                                const rect = searchBar.getBoundingClientRect();
+                                suggestionBox.style.top = `${rect.bottom + window.scrollY}px`; // Position below the search bar
+                                suggestionBox.style.left = `${rect.left}px`; // Align with the left of the search bar
+                                suggestionBox.style.width = `${rect.width}px`; // Match the width of the search bar
+                                suggestionBox.style.display = 'block'; // Show suggestions
+                            }
+                        }
+                    });
+
+                    // Keyboard navigation
+                    searchBar.addEventListener('keydown', function(event) {
+                        const items = suggestionBox.querySelectorAll('div');
+                        if (event.key === 'ArrowDown') {
+                            currentIndex = (currentIndex + 1) % items.length; // Move down
+                        } else if (event.key === 'ArrowUp') {
+                            currentIndex = (currentIndex - 1 + items.length) % items.length; // Move up
+                        } else if (event.key === 'Enter') {
+                            if (currentIndex >= 0 && currentIndex < items.length) {
+                                searchBar.value = items[currentIndex].textContent; // Set the search bar value
+                                suggestionBox.innerHTML = ''; // Clear suggestions
+                                suggestionBox.style.display = 'none'; // Hide suggestion box
+                            }
+                            return; // Prevent form submission
+                        }
+
+                        // Highlight the current suggestion
+                        items.forEach((item, index) => {
+                            item.style.backgroundColor = (index === currentIndex) ? '#f0f0f0' : '#fff';
+                        });
+                    });
+
+                    // Hide suggestion box when clicking outside
+                    document.addEventListener('click', function(event) {
+                        if (!suggestionBox.contains(event.target) && event.target !== searchBar) {
+                            suggestionBox.style.display = 'none';
+                        }
+                    });
+                })
+                .catch(error => console.error('Error fetching stock names:', error));
+        });
+        
         document.getElementById('period-selector').addEventListener('change', function() {
             const value = this.value;
             const dateInputs = document.getElementById('date-inputs');
@@ -112,27 +218,26 @@
         }
         
         function renderChart(data) {
+            console.log(clicked)
             if(clicked==2){
                 const elements = document.getElementsByClassName("tv-lightweight-charts");
                 while (elements.length > 0) {
                     elements[0].remove(); // Remove the first element in the collection
                 }
             }
-            
-            const chart = LightweightCharts.createChart(document.getElementById('chart'), {
-                // width: document.getElementById('chart').clientWidth,
-                // height: document.getElementById('chart').clientHeight,
-            });
-    
+            const chart = LightweightCharts.createChart(document.getElementById('chart'),{
+                width: document.getElementById('chart').clientWidth,
+                height: document.getElementById('chart').height,
+                });
             const lineSeries = chart.addCandlestickSeries({
-                upColor: 'green',
-                downColor: 'red',
-                borderUpColor: 'green',
-                borderDownColor: 'red',
-                wickUpColor: 'green',
-                wickDownColor: 'red',
+                upColor: 'seagreen',
+                downColor: 'orangered',
+                borderUpColor: 'seagreen',
+                borderDownColor: 'orangered',
+                wickUpColor: 'seagreen',
+                wickDownColor: 'firebrick',
             });
-    
+            
             lineSeries.setData(data);
         }
     </script>

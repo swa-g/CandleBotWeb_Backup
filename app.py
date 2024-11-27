@@ -72,7 +72,6 @@ def login():
                 return redirect('/dashboard')  # Redirect to the dashboard on successful login
             else:
                 flash('Invalid username or password. Please try again.')
-
     return render_template('login.html', form=form)
 
 @app.route('/dashboard')
@@ -98,7 +97,7 @@ def fetch_stock_data():
     end_date = request.args.get('end')
 
     # Fetch the data using yfinance
-    
+    stock_symbol = stock_symbol.split('-')[1]
     if period == "None":
         df = yf.download(stock_symbol, interval=interval, start=start_date, end=end_date, multi_level_index=False, progress=False) 
     else:
@@ -116,6 +115,20 @@ def fetch_stock_data():
         })
 
     return jsonify(data)
+
+@app.route('/get_stock_names', methods=['GET'])
+def get_stock_names():
+    try:
+        pickle_file_path = os.path.join('data', 'stock_names.pkl')
+        if os.path.exists(pickle_file_path):
+            df = pd.read_pickle(pickle_file_path)
+            suggestions = [f"{row['name']}-{row['tag']}-{row['market']}" for index, row in df.iterrows()]
+            return jsonify(suggestions)  # Return formatted suggestions
+        else:
+            return jsonify([])  # Return an empty list if the file does not exist
+    except Exception as e:
+        print(f"Error: {e}")  # Log the error to the console
+        return jsonify({"error": "Internal Server Error"}), 500  # Return a 500 error response
 
 if __name__ == '__main__':
     if not os.path.exists('data'):

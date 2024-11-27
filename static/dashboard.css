@@ -1,39 +1,43 @@
 body {
-    font-family: 'Roboto';
-    font-size: 20pt;
+    font-size:medium;
+    font-family: Roboto, sans-serif;
     margin: 0;
     padding: 0;
     align-items: center;
     justify-content: center;
-    background-color: #ffffff
+    background-color: #ffffff;
 }
+
+/* ------ NAV BAR --------- */
 
 .navbar {
     display: flex;
-    justify-content: space-between;
+    justify-content: space-evenly;
     align-items: center;
     background-color: #f0f0f0;
     color: rgb(0, 0, 0);
     padding: 10px 10px;
-    font-size: 20pt;
+}
+
+.welcome {
+    font-size:larger;
+    font-weight: bold;
 }
 
 .navbar .minilogo {
     height: 70px;
-    font-size: 20pt;
 }
 
 .nav-links {
-    display: flex;
-    font-family: Roboto;
-    padding: 10px 10px;
-    gap: 20px;
-    font-size: 20pt;
+    display: table-cell;
+    padding:10px 30px;
+    gap: 50 ;
 }
 
 .nav-links a {
     color: rgb(0, 0, 0);
     text-decoration: none;
+    margin:5px 5px
 }
 
 .nav-links :hover {
@@ -47,53 +51,124 @@ body {
     border: none;
     color: white;
     cursor: pointer;
-    border-radius: 10px;
+    border-radius: 20px;
+}
+.logout-button:hover {
+    background-color: rgb(177, 0, 38);
+    color: white;
+}
+
+/*------- DASHBOARD-------- */
+
+.dashboard-container {
+    display: flex; /* Use flexbox for layout */
+    margin: 0 10%; /* 10% margin on left and right */
+}
+
+
+/* -------LEFT COLUMN -----*/
+.left-column {
+    width: 70%; /* Left column takes 50% of the width */
+    margin-right: 0; /* No additional margin on the right */
 }
 
 .search-container {
     display: flex;
     align-items: center;
-    padding: 20px;
-    gap: 5px;
+    gap: 10px;
     justify-content: center;
-    
-
+    margin-bottom: 2px;
+    font-size: medium
 }
 
-.search-container input[type="text"],
-.search-container select {
-    font-size: 14pt;
-    margin-right: 10px;
-    padding: 5px;
-    
-}
-
-.dates {
-    font-family: Roboto;
-    font-size: 14pt;
-    margin-top: 15px;
-    margin-left: 5px;
-    margin-right: 5px;
-    height: 24pt;
-    align-items: center;
+.search-container input[type="text"]{
+    width: 100%;
+    height: fit-content;
 }
 
 .search-button{   
     padding: 5px 5px;
-    background-color: #ee145c;
-    font-size: 16pt;
-    font-family: Roboto;
-    color: white;
-    width: 100px;
-
+    background-color: #1de184;
+    color: black;
+    width: fit-content;
+    height: fit-content;
+    border-width: 0px;
 }
 
+
+.search-button:hover{ 
+    background-color: #00b68e;
+    color: white;
+}
+
+.selector-container {
+    display:flex;
+    justify-content: center;
+    align-items: center;
+    gap: 40px;
+}
+
+#date-inputs{
+    display: flex;
+    align-items: center; /* Align items vertically */
+    justify-content: center; /* Align items horizontally */
+    gap: 20px
+}
+
+.date-input-row {
+    display: flex; /* Use flexbox for layout */
+    align-items: center; /* Align items vertically */
+    justify-content: center; /* Align items horizontally */
+    margin-top: 2px; /* Space above the date inputs */
+    gap: 20px
+}
+
+.dates {
+    margin-top: 0; /* Remove top margin for date inputs */
+    height:fit-content;
+    align-items: center; /* Center alignment for inputs */
+    justify-content: center; /* Center alignment for inputs */
+}
+
+
 #chart{
-    margin-top: 20px;
+    margin-top: 10px;
     align-content: center;
     justify-content: center;
     margin-left: auto;
     margin-right: auto;
-    display: block;
+    display: flex;
+    width: 100%;
+    height: 500px;
+    background-color: #f9f9f9; /* Light background for the chart area */
+    border: 1px solid #ccc; /* Border for better visibility */
+    margin-top: 20px; /* Space above the chart */
 
+}
+
+#suggestion-box {
+    position: absolute; /* Make it absolute to place it below the search bar */
+    max-height: 200px; /* Limit height */
+    overflow-y: auto; /* Scroll if too many suggestions */
+    background-color: #fff; /* Background color */
+    border: 1px solid #ccc; /* Border for better visibility */
+    z-index: 1000; /* Ensure it appears above other elements */
+}
+
+#suggestion-box div {
+    display: flex; /* Use flexbox for layout */
+    justify-content: space-between; /* Space between elements */
+    padding: 5px; /* Padding for better spacing */
+    cursor: pointer; /* Pointer cursor on hover */
+}
+
+#suggestion-box div:hover {
+    background-color: #f0f0f0; /* Highlight on hover */
+}
+
+
+/* RIGHT COLUMN */
+.right-column {
+    width: 30%; /* Right column takes 30% of the width */
+    margin-left: 0; /* No additional margin on the left */
 }
