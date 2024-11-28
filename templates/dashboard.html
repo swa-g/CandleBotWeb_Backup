@@ -57,24 +57,34 @@
                     <option value="5d">5 Days</option>
                     <option value="3mo">3 Months</option>
                 </select>
+                <div id="date-inputs" style="display: flex;">
+                    <div class="date-input-row">
+                        <p style="font-size: small;">Start:</p>
+                        <input type="date" id="start-date" class="dates" disabled>
+                        <p style="font-size: small;">End-Date:</p>
+                        <input type="date" id="end-date" class="dates" disabled>
+                    </div>
+                </div>
             </div>
             
             <!-- New container for date inputs -->
 
-            <div id="date-inputs" style="display: none;">
-                <div class="date-input-row">
-                    <p style="font-size: small;">Start-Date:</p>
-                    <input type="date" id="start-date" class="dates">
-                    <p style="font-size: small;">End-Date:</p>
-                    <input type="date" id="end-date" class="dates">
-                </div>
-            </div>
+            
 
             <div id="chart"></div>
         </div>
 
         <div class="right-column">
-            <!-- Right column content will go here -->
+            <div class="watchlist-panel">
+                <div id="watchlist-header">
+                    <h3>Watchlist</h3>
+                    <input type="text" id='watchlist-search-bar' placeholder="Add stocks to Watchlist" style="display: none">
+                    <button id="add-stock-button" class="add-stock-button">&#x2b</button>
+                </div>
+                <div id="watchlist-container">
+                    <!-- Watchlist items will be dynamically added here -->
+                </div>
+            </div>
         </div>
     </div>
 
@@ -171,13 +181,20 @@
         
         document.getElementById('period-selector').addEventListener('change', function() {
             const value = this.value;
-            const dateInputs = document.getElementById('date-inputs');
+            const startDateInput = document.getElementById('start-date');
+            const endDateInput = document.getElementById('end-date');
+            
             if (value === 'None') {
-                dateInputs.style.display = 'flex';
-            } else {
-                dateInputs.style.display = 'none';
+                startDateInput.disabled = false; // Enable start date input
+                endDateInput.disabled = false; // Enable end date input
+            } 
+            
+            else {
+                startDateInput.disabled = true; // Keep them disabled
+                endDateInput.disabled = true; // Keep them disabled
             }
         });
+
         var clicked=0
         document.getElementById('search-button').addEventListener('click', function() {
             const stockSymbol = document.getElementById('search-bar').value;
@@ -218,7 +235,6 @@
         }
         
         function renderChart(data) {
-            console.log(clicked)
             if(clicked==2){
                 const elements = document.getElementsByClassName("tv-lightweight-charts");
                 while (elements.length > 0) {
@@ -240,10 +256,94 @@
             
             lineSeries.setData(data);
         }
-        window.addEventListener('resize', function() {
-        if (chartData.length > 0) { // Check if there's data to render
-            renderChart(chartData); // Re-render the chart with the stored data
+        
+
+    document.addEventListener("DOMContentLoaded", function() {
+        const watchlistContainer = document.getElementById('watchlist-container');
+        const addStockButton = document.getElementById('add-stock-button');
+        const suggestionBox = document.createElement('div');
+        suggestionBox.setAttribute('id', 'suggestion-box');
+        document.body.appendChild(suggestionBox);
+        
+        addStockButton.addEventListener('click', function() {
+            // Open the search bar for adding stocks
+            searchBar = document.getElementById('watchlist-search-bar');
+            searchBar.style.display = 'block';
+            
+            // Fetch stock names for suggestions
+            fetch('/get_stock_names')
+                .then(response => response.json())
+                .then(suggestions => {
+                    searchBar.addEventListener('input', function() {
+                        const query = this.value.toLowerCase();
+                        suggestionBox.innerHTML = ''; // Clear previous suggestions
+                        suggestionBox.style.display = 'none'; // Hide if no input
+                        
+                        if (query) {
+                            const filteredNames = suggestions.filter(name => name.toLowerCase().includes(query));
+                            filteredNames.forEach(name => {
+                                const suggestionItem = document.createElement('div');
+                                suggestionItem.textContent = name;
+                                suggestionItem.onclick = function() {
+                                    addToWatchlist(name); // Add selected stock to watchlist
+                                    suggestionBox.innerHTML = ''; // Clear suggestions
+                                    suggestionBox.style.display = 'none'; // Hide suggestion box
+                                    searchBar.style.display = 'none'; // Remove search bar
+                                };
+                                suggestionBox.appendChild(suggestionItem);
+                            });
+                            suggestionBox.style.display = 'block'; // Show suggestions
+                            if (filteredNames.length > 0) {
+                                // Position the suggestion box below the search bar
+                                const rect = searchBar.getBoundingClientRect();
+                                suggestionBox.style.top = `${rect.bottom + window.scrollY}px`; // Position below the search bar
+                                suggestionBox.style.left = `${rect.left}px`; // Align with the left of the search bar
+                                suggestionBox.style.width = `${rect.width}px`; // Match the width of the search bar
+                                suggestionBox.style.display = 'block'; // Show suggestions
+                            }
+                        }
+                    });
+                })
+                .catch(error => console.error('Error fetching stock names:', error));
+        });
+
+        function addToWatchlist(stockName) {
+            const [companyName, symbol, market] = stockName.split('-');
+            // Fetch current price and change percentage
+            fetch(`/fetch_stock_data?symbol=${stockName}&period=5d&interval=1d`) // Change period to 5d
+                .then(response => response.json())
+                .then(data => {
+                    if (data.length < 2) {
+                        console.error('Not enough data to calculate price change.');
+                        alert('Not enough data to display stock information.');
+                        return; // Exit if there isn't enough data
+                    }
+
+                    const currentPrice = data[data.length - 1].close; // Get the latest close price
+                    const previousClose = data[data.length - 2].close; // Get the previous close price
+                    const priceChange = ((currentPrice - previousClose) / previousClose) * 100; // Calculate percentage change
+                    const priceClass = priceChange >= 0 ? 'price-up' : 'price-down'; // Determine price color class
+                    const priceColor = priceChange >= 0 ? 'green' : 'red'; // Determine price color class
+                    const symbol = priceChange >= 0 ? '&#x25b2': '&#x25bc';
+                    // Create a new watchlist item
+                    const watchlistItem = document.createElement('div');
+                    watchlistItem.className = `watchlist-item ${priceClass}`;
+                    watchlistItem.innerHTML = `
+                        <span>${companyName} (${market}) <br> <span style="color:${priceColor}">${symbol}</span> &#x20b9 <span style="font-weight:bold">${currentPrice.toFixed(2)}</span> (<span style="color:${priceColor}">${priceChange.toFixed(2)}%</span>)</span>
+                        <button class="remove-button" onclick="removeFromWatchlist(this)">&#x2a2f</button>
+                    `;
+                    watchlistContainer.appendChild(watchlistItem);
+                })
+                .catch(error => {
+                    console.error('Error fetching stock data:', error);
+                    alert('Failed to fetch stock data. Please try again.');
+                });
         }
+
+        window.removeFromWatchlist = function(button) {
+            const item = button.parentElement;
+            watchlistContainer.removeChild(item); // Remove the item from the watchlist
+        };
     });
     </script>
 </body>

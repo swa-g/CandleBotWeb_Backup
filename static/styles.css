@@ -8,10 +8,21 @@ body {
     font-family: 'Roboto', sans-serif; /* Modern font */
 }
 
-.container {
+.container-register {
     text-align: center;
     width: 100%; /* Responsive width */
     max-width: 500px; /* Max width for forms */
+    padding: 30px; /* Padding for the container */
+    border: 1px solid #ddd; /* Light border */
+    border-radius: 10px; /* Rounded corners */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    background-color: #f9f9f9; /* Light background for forms */
+}
+
+.container-login {
+    text-align: center;
+    width: 100%; /* Responsive width */
+    max-width: 400px; /* Max width for forms */
     padding: 30px; /* Padding for the container */
     border: 1px solid #ddd; /* Light border */
     border-radius: 10px; /* Rounded corners */
@@ -25,7 +36,7 @@ body {
     margin-bottom: 20px;
 }
 .minilogo {
-    width: 70%; /* Set logo width to 50% */
+    width: 300; /* Set logo width to 50% */
     height: auto; /* Maintain aspect ratio */
     margin-bottom: 20px;
 }
@@ -87,7 +98,7 @@ input[type="text"], input[type="password"], input[type="email"] {
     padding: 5px; /* Padding for input fields */
     border: 1px solid #ccc; /* Light border */
     border-radius: 5px; /* Rounded corners */
-    font-size: 16px; /* Font size */
+    font-size: 12pt; /* Font size */
 }
 
 input[type="text"]:focus, input[type="password"]:focus, input[type="email"]:focus {
@@ -109,6 +120,7 @@ input[type="text"]:focus, input[type="password"]:focus, input[type="email"]:focu
 .fields input {
     width: 60%; /* Adjust width as needed */
 }
+
 button, input[type="submit"] {
     padding: 10px; /* Padding for buttons */
     border: none; /* Remove default border */
@@ -128,5 +140,6 @@ button:hover, input[type="submit"]:hover {
 span[style*="color: red;"] {
     color: red; /* Error message color */
     font-size: 14px; /* Font size for error messages */
+    
 }
 

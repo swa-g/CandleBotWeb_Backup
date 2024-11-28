@@ -7,20 +7,20 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
-    <div class="container">
+    <div class="container-login">
         <img src="{{ url_for('static', filename='logo.png') }}" alt="CandleBot Logo" class="minilogo">
         <form method="POST">
             {{ form.hidden_tag() }}
-            <div>
-                {{ form.username.label }} :
-                {{ form.username(size=16) }}<br>
+            <div class="fields">
+                {{ form.username.label }}
+                {{ form.username }}<br>
                 {% for error in form.username.errors %}
                     <span style="color: red;">[{{ error }}]</span>
                 {% endfor %}
             </div>
-            <div>
-                {{ form.password.label }} :
-                {{ form.password(size=16) }}
+            <div class="fields">
+                {{ form.password.label }}
+                {{ form.password }}
                 {% for error in form.password.errors %}
                     <span style="color: red;">[{{ error }}]</span>
                 {% endfor %}

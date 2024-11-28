@@ -62,14 +62,14 @@ body {
 
 .dashboard-container {
     display: flex; /* Use flexbox for layout */
-    margin: 0 10%; /* 10% margin on left and right */
+    margin: 2% 5%; /* 10% margin on left and right */
 }
 
 
 /* -------LEFT COLUMN -----*/
 .left-column {
     width: 70%; /* Left column takes 50% of the width */
-    margin-right: 0; /* No additional margin on the right */
+    margin-right: 20px; /* No additional margin on the right */
 }
 
 .search-container {
@@ -105,14 +105,15 @@ body {
     display:flex;
     justify-content: center;
     align-items: center;
-    gap: 40px;
+    gap: 5px;
+    max-width: 100%;
 }
 
 #date-inputs{
     display: flex;
     align-items: center; /* Align items vertically */
     justify-content: center; /* Align items horizontally */
-    gap: 20px
+    gap: 5px
 }
 
 .date-input-row {
@@ -120,7 +121,7 @@ body {
     align-items: center; /* Align items vertically */
     justify-content: center; /* Align items horizontally */
     margin-top: 2px; /* Space above the date inputs */
-    gap: 20px
+    gap: 5px
 }
 
 .dates {
@@ -130,6 +131,12 @@ body {
     justify-content: center; /* Center alignment for inputs */
 }
 
+.dates:disabled {
+    background-color: #f0f0f0; /* Light gray background */
+    color: #a0a0a0; /* Gray text color */
+    border: 1px solid #ccc; /* Light border */
+    cursor: not-allowed; /* Change cursor to indicate disabled state */
+}
 
 #chart{
     margin-top: 10px;
@@ -166,9 +173,72 @@ body {
     background-color: #f0f0f0; /* Highlight on hover */
 }
 
-
 /* RIGHT COLUMN */
 .right-column {
     width: 30%; /* Right column takes 30% of the width */
     margin-left: 0; /* No additional margin on the left */
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.watchlist-panel {
+    background-color: #f9f9f9;
+    border: 1px solid #ccc;
+    
+    border-radius: 5px;
+    margin-top: 0px;
+    width: 100%;
+}
+
+#watchlist-header {
+    display: flex;
+    padding: 10px;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.add-stock-button {
+    background-color: seagreen;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.add-stock-button:hover {
+    background-color: springgreen;
+}
+
+.watchlist-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 5px 0;
+    padding: 5px;
+    border-bottom: 1px solid #ccc;
+}
+
+.watchlist-item .remove-button {
+    background-color: crimson;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.watchlist-item .remove-button:hover {
+    background-color: orangered;
+}
+
+.price-up {
+    color: green;
+}
+
+.price-down {
+    color: red;
+}
+
+.watchlist-item span {
+    color: black; /* Set default text color to black */
 }
