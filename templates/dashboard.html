@@ -226,20 +226,25 @@
                 }
             }
             const chart = LightweightCharts.createChart(document.getElementById('chart'),{
-                width: document.getElementById('chart').clientWidth,
+                width: document.getElementById('chart').width,
                 height: document.getElementById('chart').height,
                 });
             const lineSeries = chart.addCandlestickSeries({
                 upColor: 'seagreen',
-                downColor: 'orangered',
-                borderUpColor: 'seagreen',
-                borderDownColor: 'orangered',
-                wickUpColor: 'seagreen',
-                wickDownColor: 'firebrick',
+                downColor: 'crimson',
+                borderUpColor: 'darkgreen',
+                borderDownColor: 'maroon',
+                wickUpColor: 'darkgreen',
+                wickDownColor: 'maroon',
             });
             
             lineSeries.setData(data);
         }
+        window.addEventListener('resize', function() {
+        if (chartData.length > 0) { // Check if there's data to render
+            renderChart(chartData); // Re-render the chart with the stored data
+        }
+    });
     </script>
 </body>
 </html>

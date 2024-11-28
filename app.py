@@ -133,4 +133,4 @@ def get_stock_names():
 if __name__ == '__main__':
     if not os.path.exists('data'):
         os.makedirs('data')
-    app.run(debug=True)
+    app.run(host="0.0.0.0")

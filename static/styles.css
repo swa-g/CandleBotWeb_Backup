@@ -11,8 +11,8 @@ body {
 .container {
     text-align: center;
     width: 100%; /* Responsive width */
-    max-width: 400px; /* Max width for forms */
-    padding: 20px; /* Padding for the container */
+    max-width: 500px; /* Max width for forms */
+    padding: 30px; /* Padding for the container */
     border: 1px solid #ddd; /* Light border */
     border-radius: 10px; /* Rounded corners */
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Subtle shadow */
@@ -20,12 +20,12 @@ body {
 }
 
 .logo {
-    width: 100%; /* Set logo width to 100% */
+    width: auto; /* Set logo width to 100% */
     height: auto; /* Maintain aspect ratio */
     margin-bottom: 20px;
 }
 .minilogo {
-    width: 50%; /* Set logo width to 50% */
+    width: 70%; /* Set logo width to 50% */
     height: auto; /* Maintain aspect ratio */
     margin-bottom: 20px;
 }
@@ -61,19 +61,19 @@ body {
 }
 
 .login-button {
-    background-color: #1de184; /* Green for LOGIN */
+    background-color: seagreen; /* Green for LOGIN */
 }
 
 .login-button:hover {
-    background-color: #84f6b9; /* Lighter green on hover */
+    background-color: mediumseagreen; /* Lighter green on hover */
 }
 
 .register-button {
-    background-color: #ee145c; /* Red for REGISTER */
+    background-color: crimson; /* Red for REGISTER */
 }
 
 .register-button:hover {
-    background-color: #f86181; /* Lighter red on hover */
+    background-color: orangered; /* Lighter red on hover */
 }
 
 /* Styles for forms */
@@ -84,22 +84,36 @@ form {
 }
 
 input[type="text"], input[type="password"], input[type="email"] {
-    padding: 10px; /* Padding for input fields */
+    padding: 5px; /* Padding for input fields */
     border: 1px solid #ccc; /* Light border */
     border-radius: 5px; /* Rounded corners */
     font-size: 16px; /* Font size */
 }
 
 input[type="text"]:focus, input[type="password"]:focus, input[type="email"]:focus {
-    border-color: #1de184; /* Change border color on focus */
+    border-color: crimson; /* Change border color on focus */
     outline: none; /* Remove outline */
 }
+.fields {
+    display: flex;
+    margin: 0px 10px;
+    justify-content: space-between; /* Space between label and input */
+    align-items: center; /* Align items vertically */
+}
 
+.fields label {
+    width: 40%; /* Adjust width as needed */
+    text-align: left; /* Align label text to the left */
+}
+
+.fields input {
+    width: 60%; /* Adjust width as needed */
+}
 button, input[type="submit"] {
     padding: 10px; /* Padding for buttons */
     border: none; /* Remove default border */
     border-radius: 5px; /* Rounded corners */
-    background-color: #1de184; /* Default button color */
+    background-color: seagreen; /* Default button color */
     color: white; /* Text color */
     font-size: 16px; /* Font size */
     cursor: pointer; /* Pointer cursor */
@@ -107,7 +121,7 @@ button, input[type="submit"] {
 }
 
 button:hover, input[type="submit"]:hover {
-    background-color: #84f6b9; /* Lighter color on hover */
+    background-color: mediumseagreen; /* Lighter color on hover */
 }
 
 /* Styles for error messages */
