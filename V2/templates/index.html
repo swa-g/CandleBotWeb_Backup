@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CandleBot</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/index.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='images/favicon.png') }}" type="image/x-icon">
+</head>   
+<body>
+
+    <header class="navbar-container">
+        <div class="navbar-logo">
+            <a href="/"><img src="{{ url_for('static', filename='images/logo_symbol.png') }}" class= 'logo-symbol' alt="logo"></a>
+            <a href="/"><img src="{{ url_for('static', filename='images/logo_text.png') }}" class= 'logo-text' alt="logo"></a>
+        </div>
+
+        <nav>
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="#aboutus">About Us</a></li>
+                <li><a href="#features">Features</a></li>
+                <li><a href="#pricing">Pricing</a></li>
+                <li><a href="#contact">Contact Us</a></li>
+                <li><a href="/login">Login</a></li>
+            </ul>
+        </nav>
+
+    </header>
+
+
+    <div class="home-container">
+        <div class="hero-image-container">
+            <div class="logo-container">
+                <img src="{{ url_for('static', filename='images/logo_main.png') }}" class= 'logo_main' alt="logo">
+                <p>YOUR PERSONAL MONEYMAKING PARTNER</p>
+            </div>
+            <img src="{{ url_for('static', filename='images/hero_image.png') }}" class= 'hero_image' alt="logo">
+        </div>
+    
+        <div class="button_container">
+            <a href="/login"> GET STARTED </a>
+        </div>
+    </div>
+    
+    
+    <div class="section-container">
+        
+        <section id="aboutus"></section>
+            <div class="aboutus-container">
+                <h1>WELCOME TO CANDLEBOT</h1>
+                <div class="aboutus-span">
+                    <img src="{{ url_for('static', filename='images/about.png') }}" class= 'aboutimg' alt="logo">
+                    <p>CandleBot is your intelligent financial companion, powered by advanced AI. 
+                    We're dedicated to empowering investors of all levels with real-time market data, 
+                    cutting-edge analysis tools, and automated trading capabilities. 
+                    Our AI-driven platform scours the market, identifies trends, 
+                    and provides actionable insights to help you make informed investment decisions. 
+                    Whether you're a seasoned trader or a beginner, CandleBot is your gateway to smarter, 
+                    more profitable investing.</p>
+            </div>
+             </div>
+        </section>
+        
+
+        <section id="features">
+            <div class="features-container">
+                <h1>EARN MORE USING OUR AI TOOLS</h1>
+                <div class = "features-span">
+                    <div class = "feature-image">
+                        <img src="{{ url_for('static', filename='images/1.png') }}" alt="Chart Analysis">
+                        <p>CHART ANALYSIS</p>
+                    </div>
+                    <div class = "feature-image">
+                        <img src="{{ url_for('static', filename='images/2.png') }}" alt="Portfolio Analysis">
+                        <p>PORTFOLIO ANALYSIS</p>
+                    </div><div class = "feature-image">
+                        <img src="{{ url_for('static', filename='images/3.png') }}" alt="Stock Screening">
+                        <p>STOCK SCREENING</p>
+                    </div><div class = "feature-image">
+                        <img src="{{ url_for('static', filename='images/4.png') }}" alt="Trading Signals">
+                        <p>TRADING SIGNALS</p>
+                    </div>
+                </div>
+            </div>
+            
+        </section>
+
+        <section id="pricing">
+            <div class="pricing-container">
+                <h1>PRICING</h1>
+                <div class="pricing-span">
+                    <img src="{{ url_for('static', filename='images/buy.png') }}" alt="buy">
+                    <p>Right now CandleBot is FREE to use</p>
+                    <img src="{{ url_for('static', filename='images/sell.png') }}" alt="sell">
+                </div>
+                
+            </div>
+            
+        </section>
+
+        <section id="contact">
+            <div class="contactus-container">
+                <h2>REACH OUT TO US</h2>
+                <div class="contactus-span">
+                    <p>
+                        CandleBot Inc. <br>
+                        B3, Block 3, Airport City Phase II <br>
+                        BH 40/1 Jessore Road <br>
+                        Kolkata -700081 <br>
+                        West Bengal, India <br>
+                        Email ID - dr.swarnendu.ghosh@gmail.com
+                    </p>
+                    <div class="contact-links">
+                        <ul>
+                            <li><a href="/">Facebook</a></li>
+                            <li><a href="/">Instagram</a></li>
+                            <li><a href="/">LinkedIn</a></li>
+                            <li><a href="/">Twitter</a></li>
+                        </ul>
+                    </div>
+                    
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <script src="scripts/index.js"></script> -->
+    
+</body>

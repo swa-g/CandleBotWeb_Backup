@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CandleBot</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/auth.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='images/favicon.png') }}" type="image/x-icon">
+</head>   
+<body>
+
+    <header class="navbar-container">
+        <div class="navbar-logo">
+            <a href="/"><img src="{{ url_for('static', filename='images/logo_symbol.png') }}" class= 'logo-symbol' alt="logo"></a>
+            <a href="/"><img src="{{ url_for('static', filename='images/logo_text.png') }}" class= 'logo-text' alt="logo"></a>        </div>
+        
+        <nav>
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="/login">Login</a></li>
+                <li><a href="/register">Register</a></li>
+            </ul>
+        </nav>       
+
+    </header>
+
+    <div class="auth-container">
+        <div class="login-container">
+            <img src="{{ url_for('static', filename='images/logo_main.png') }}" alt="CandleBot Logo" class="minilogo">
+            <form method="POST">
+                {{ form.hidden_tag() }}
+                <div class="fields">
+                    {{ form.username.label }}
+                    {{ form.username }}<br>
+                    {% for error in form.username.errors %}
+                        <span>[{{ error }}]</span>
+                    {% endfor %}
+                </div>
+                <div class="fields">
+                    {{ form.password.label }}
+                    {{ form.password }}
+                    {% for error in form.password.errors %}
+                        <span>[{{ error }}]</span>
+                    {% endfor %}
+                </div>
+                <div>
+                    {{ form.submit() }}
+                </div>
+            </form>
+            <a href="/register">Don't have an account? Register here.</a>
+        </div>
+    </div>
+    
+    <footer>
+        <section id="contact">
+            <div class="contactus-container">
+                <h2>REACH OUT TO US</h2>
+                <div class="contactus-span">
+                    <p>
+                        CandleBot Inc. <br>
+                        B3, Block 3, Airport City Phase II <br>
+                        BH 40/1 Jessore Road <br>
+                        Kolkata -700081 <br>
+                        West Bengal, India <br>
+                        Email ID - dr.swarnendu.ghosh@gmail.com
+                    </p>
+                    <div class="contact-links">
+                        <ul>
+                            <li><a href="/">Facebook</a></li>
+                            <li><a href="/">Instagram</a></li>
+                            <li><a href="/">LinkedIn</a></li>
+                            <li><a href="/">Twitter</a></li>
+                        </ul>
+                    </div>
+                    
+                </div>
+            </div>
+        </section>
+    </footer>
+    
+
+    </div>
+
+    <script src="scripts/index.js"></script> -->
+    
+</body>

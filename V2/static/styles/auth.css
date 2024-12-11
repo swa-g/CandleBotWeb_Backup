@@ -1,0 +1,218 @@
+body {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    font-weight: lighter;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    background-image: linear-gradient(to right , rgb(68, 0, 65), rgb(35, 0, 68) , rgb(0, 9, 66), rgb(0, 37, 66));   
+    overflow-x: hidden;
+    overflow-y: hidden;
+    
+}
+/*background-color: rgb(20,5,50);
+    */
+
+/* ------NAV BAR-----*/
+
+.navbar-container {
+    display: flex;
+    position: sticky;
+    background-color: rgba(0, 0, 0, 0.5);;
+    align-items: center;
+    justify-content: space-between;
+    height:8vh;
+    width: 100vw;
+    top: 0;
+    z-index: 1000;
+}
+
+.navbar-logo{
+    display: flex;
+}
+
+.navbar-logo img{
+    height: 6vh;
+    max-height: 30px;
+    align-items: center; 
+    margin-top: 1vh;
+    margin-bottom: 1vh;
+}
+
+.logo-symbol{
+    margin-left: 20px;
+}
+
+.navbar-container nav ul {
+    list-style-type: none;
+    margin: 15px 15px;
+    padding: 0;
+    text-align: right;
+}
+
+.navbar-container nav ul li {
+    display: inline;
+    vertical-align: right;
+    margin: 0 15px;
+    
+}
+
+.navbar-container nav ul li a {
+    color: white;
+    text-decoration: none;
+    font-size: max(14pt,min(2.5vh,2.5vw));
+    
+    
+}
+
+.navbar-container nav ul li a:hover {
+    color: springgreen;
+}
+
+.navbar-container nav ul li a:active {
+    color: crimson;
+}
+
+
+
+/* AUTH CONTAINER */
+
+.auth-container{
+    display: flex;
+    height: 100vh;
+    align-items: center;
+    justify-content: center;
+}
+
+.auth-container a{
+    color: #aaa;
+    font-size: small;
+}
+
+.register-container {
+    text-align: center;
+    width: 100%; /* Responsive width */
+    max-width: 400px; /* Max width for forms */
+    padding: 30px; /* Padding for the container */
+    border-radius: 10px; /* Rounded corners */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    background-color: rgba(0, 0, 0, 0.3); /* Light background for forms */
+    color: white;
+}
+
+.login-container {
+    text-align: center;
+    width: 100%; /* Responsive width */
+    max-width: 400px; /* Max width for forms */
+    padding: 30px; /* Padding for the container */
+    border-radius: 10px; /* Rounded corners */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    background-color: rgba(0, 0, 0, 0.3); /* Light background for forms */
+    color: white;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px; /* Space between form elements */
+}
+
+input[type="text"], input[type="password"], input[type="email"] {
+    padding: 5px; /* Padding for input fields */
+    background-color: rgba(0, 0, 0, 0.2);
+    color: #fff;
+    border: 1px solid #444; /* Light border */
+    border-radius: 5px; /* Rounded corners */
+    font-size: 12pt; /* Font size */
+}
+
+input[type="text"]:focus, input[type="password"]:focus, input[type="email"]:focus {
+    border-color: crimson; /* Change border color on focus */
+    outline: none; /* Remove outline */
+}
+.fields {
+    display: flex;
+    margin: 0px 10px;
+    justify-content: space-between; /* Space between label and input */
+    align-items: center; /* Align items vertically */
+}
+
+.fields label {
+    width: 40%; /* Adjust width as needed */
+    text-align: left; /* Align label text to the left */
+}
+
+.fields input {
+    width: 60%; /* Adjust width as needed */
+}
+
+button, input[type="submit"] {
+    padding: 10px; /* Padding for buttons */
+    border: none; /* Remove default border */
+    border-radius: 5px; /* Rounded corners */
+    background-color: mediumseagreen; /* Default button color */
+    color: white; /* Text color */
+    font-size: 16px; /* Font size */
+    cursor: pointer; /* Pointer cursor */
+    transition: background-color 0.3s; /* Smooth transition */
+}
+button:hover, input[type="submit"]:hover {
+    background-color: springgreen; /* Lighter color on hover */
+    color: forestgreen;
+    transition: background-color 0.3s; /* Smooth transition */
+}
+
+/* Styles for error messages */
+.fields span {
+    color: red; /* Error message color */
+    font-size: 14px; /* Font size for error messages */
+    
+}
+
+.minilogo{
+    width: 70%;
+    margin-bottom: 20px;
+
+}
+
+/* CONTACT US */
+.contactus-container{
+    display: flex;
+    background-color: black;
+    flex-direction: column;
+    height:100vh;
+    align-items: center;
+    justify-content: center;
+    font-size: 4vw;
+    color:springgreen
+}
+
+.contactus-span{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap:20vw;
+    font-size: 2vw;
+    color:white;
+}
+
+.contact-links{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.contact-links ul{
+    display: flex;
+    flex-direction: column;
+    list-style-type: none;
+    text-align: right;
+    gap:1vh;
+}
+
+.contact-links ul li a{
+    text-align: right;
+    text-decoration: none;
+    color:white;
+    vertical-align: right;
+}
