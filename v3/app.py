@@ -6,6 +6,9 @@ import os
 import pandas as pd
 import json
 from datetime import datetime, timedelta
+import yfinance as yf
+from flask import Response
+import time
 import random  # For demo data
 
 app = Flask(__name__)
@@ -110,6 +113,10 @@ def search_stocks():
     
     return jsonify(results)
 
+# Cache for storing stock data
+stock_cache = {}
+CACHE_DURATION = 60  # 60 seconds (1 minute)
+
 @app.route('/get_stock_data')
 @login_required
 def get_stock_data():
@@ -117,35 +124,64 @@ def get_stock_data():
     if not symbol:
         return jsonify([])
     
-    # Generate demo data for now
-    # In a real application, you would fetch this from your data source
-    end_date = datetime.now()
-    start_date = end_date - timedelta(days=365)
+    current_time = time.time()
     
-    data = []
-    current_price = random.uniform(50, 200)
+    # Check cache first
+    if symbol in stock_cache:
+        cached_data = stock_cache[symbol]
+        if current_time - cached_data['timestamp'] < CACHE_DURATION:
+            return jsonify(cached_data['data'])
     
-    current_date = start_date
-    while current_date <= end_date:
-        if current_date.weekday() < 5:  # Only trading days
-            open_price = current_price * random.uniform(0.98, 1.02)
-            high_price = open_price * random.uniform(1.01, 1.04)
-            low_price = open_price * random.uniform(0.96, 0.99)
-            close_price = high_price * random.uniform(0.98, 1.02)
-            
-            data.append({
-                'time': current_date.strftime('%Y-%m-%d'),
-                'open': round(open_price, 2),
-                'high': round(high_price, 2),
-                'low': round(low_price, 2),
-                'close': round(close_price, 2)
-            })
-            
-            current_price = close_price
+    try:
+        # Get stock data from yfinance
+        stock = yf.Ticker(symbol)
+        # Get 1 year of daily data
+        df = stock.history(period="1y", interval="1d")
         
-        current_date += timedelta(days=1)
+        # Format data for TradingView chart
+        data = []
+        for index, row in df.iterrows():
+            data.append({
+                'time': index.strftime('%Y-%m-%d'),
+                'open': round(float(row['Open']), 2),
+                'high': round(float(row['High']), 2),
+                'low': round(float(row['Low']), 2),
+                'close': round(float(row['Close']), 2),
+                'volume': int(row['Volume'])
+            })
+        
+        # Update cache
+        stock_cache[symbol] = {
+            'timestamp': current_time,
+            'data': data
+        }
+        
+        return jsonify(data)
+    except Exception as e:
+        print(f"Error fetching data for {symbol}: {str(e)}")
+        return jsonify([])
+
+@app.route('/get_latest_price')
+@login_required
+def get_latest_price():
+    symbol = request.args.get('symbol')
+    if not symbol:
+        return jsonify({'error': 'No symbol provided'})
     
-    return jsonify(data)
+    try:
+        stock = yf.Ticker(symbol)
+        current_data = stock.history(period="1d", interval="1m").iloc[-1]
+        
+        return jsonify({
+            'price': round(float(current_data['Close']), 2),
+            'change': round(float(current_data['Close'] - current_data['Open']), 2),
+            'changePercent': round(float((current_data['Close'] - current_data['Open']) / current_data['Open'] * 100), 2),
+            'volume': int(current_data['Volume']),
+            'time': datetime.now().strftime('%H:%M:%S')
+        })
+    except Exception as e:
+        print(f"Error fetching latest price for {symbol}: {str(e)}")
+        return jsonify({'error': str(e)})
 
 if __name__ == '__main__':
     with app.app_context():
