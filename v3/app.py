@@ -31,6 +31,23 @@ class User(UserMixin, db.Model):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
+class Wishlist(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    stock_symbol = db.Column(db.String(20), nullable=False)
+    stock_name = db.Column(db.String(100), nullable=False)
+    date_added = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'stock_symbol': self.stock_symbol,
+            'stock_name': self.stock_name,
+            'date_added': self.date_added.strftime('%Y-%m-%d %H:%M:%S')
+        }
+
+User.wishlist = db.relationship('Wishlist', backref='user', lazy=True)
+
 @login_manager.user_loader
 def load_user(id):
     return User.query.get(int(id))
@@ -124,37 +141,22 @@ def get_stock_data():
     if not symbol:
         return jsonify([])
     
-    current_time = time.time()
-    
-    # Check cache first
-    if symbol in stock_cache:
-        cached_data = stock_cache[symbol]
-        if current_time - cached_data['timestamp'] < CACHE_DURATION:
-            return jsonify(cached_data['data'])
-    
     try:
-        # Get stock data from yfinance
         stock = yf.Ticker(symbol)
-        # Get 1 year of daily data
-        df = stock.history(period="1y", interval="1d")
+        # Get intraday data for today
+        df = stock.history(period="1d", interval="1m")
         
         # Format data for TradingView chart
         data = []
         for index, row in df.iterrows():
             data.append({
-                'time': index.strftime('%Y-%m-%d'),
+                'time': index.strftime('%Y-%m-%d %H:%M'),
                 'open': round(float(row['Open']), 2),
                 'high': round(float(row['High']), 2),
                 'low': round(float(row['Low']), 2),
                 'close': round(float(row['Close']), 2),
                 'volume': int(row['Volume'])
             })
-        
-        # Update cache
-        stock_cache[symbol] = {
-            'timestamp': current_time,
-            'data': data
-        }
         
         return jsonify(data)
     except Exception as e:
@@ -182,6 +184,80 @@ def get_latest_price():
     except Exception as e:
         print(f"Error fetching latest price for {symbol}: {str(e)}")
         return jsonify({'error': str(e)})
+
+@app.route('/get_latest_candle')
+@login_required
+def get_latest_candle():
+    symbol = request.args.get('symbol')
+    if not symbol:
+        return jsonify({'error': 'No symbol provided'})
+    
+    try:
+        stock = yf.Ticker(symbol)
+        # Get the latest minute's data
+        df = stock.history(period="1d", interval="1m").tail(1)
+        
+        if len(df) > 0:
+            latest = df.iloc[-1]
+            # Format timestamp for intraday data
+            timestamp = latest.name.strftime('%Y-%m-%d %H:%M')
+            data = {
+                'time': timestamp,
+                'open': round(float(latest['Open']), 2),
+                'high': round(float(latest['High']), 2),
+                'low': round(float(latest['Low']), 2),
+                'close': round(float(latest['Close']), 2),
+                'volume': int(latest['Volume'])
+            }
+            return jsonify(data)
+    except Exception as e:
+        print(f"Error fetching latest candle for {symbol}: {str(e)}")
+        return jsonify({'error': str(e)})
+
+@app.route('/add_to_wishlist', methods=['POST'])
+@login_required
+def add_to_wishlist():
+    data = request.get_json()
+    symbol = data.get('symbol')
+    name = data.get('name')
+    
+    if not symbol or not name:
+        return jsonify({'error': 'Missing required fields'}), 400
+        
+    # Check if already in wishlist
+    existing = Wishlist.query.filter_by(user_id=current_user.id, stock_symbol=symbol).first()
+    if existing:
+        return jsonify({'error': 'Stock already in wishlist'}), 400
+        
+    wishlist_item = Wishlist(
+        user_id=current_user.id,
+        stock_symbol=symbol,
+        stock_name=name
+    )
+    
+    db.session.add(wishlist_item)
+    db.session.commit()
+    
+    return jsonify(wishlist_item.to_dict())
+
+@app.route('/remove_from_wishlist/<int:item_id>', methods=['DELETE'])
+@login_required
+def remove_from_wishlist(item_id):
+    wishlist_item = Wishlist.query.get_or_404(item_id)
+    
+    if wishlist_item.user_id != current_user.id:
+        return jsonify({'error': 'Unauthorized'}), 403
+        
+    db.session.delete(wishlist_item)
+    db.session.commit()
+    
+    return jsonify({'message': 'Item removed successfully'})
+
+@app.route('/get_wishlist')
+@login_required
+def get_wishlist():
+    wishlist = Wishlist.query.filter_by(user_id=current_user.id).all()
+    return jsonify([item.to_dict() for item in wishlist])
 
 if __name__ == '__main__':
     with app.app_context():

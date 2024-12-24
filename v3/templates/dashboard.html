@@ -3,32 +3,36 @@
 {% block title %}Dashboard{% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <div class="row mb-4">
-        <div class="col-md-6 offset-md-3">
-            <div class="input-group">
-                <input type="text" id="stockSearch" class="form-control" placeholder="Search for stocks..." autocomplete="off">
-                <button class="btn btn-primary" type="button" id="searchBtn">
-                    <i class="fas fa-search"></i> Search
-                </button>
-            </div>
-            <div id="searchResults" class="list-group mt-2 d-none">
-                <!-- Search results will be populated here -->
+<div class="container-fluid mt-4">
+    <div class="row">
+        <!-- Main content -->
+        <div class="col-md-9">
+            <div class="card">
+                <div class="card-body">
+                    <div class="input-group mb-3">
+                        <input type="text" id="stockSearch" class="form-control" placeholder="Search for stocks...">
+                        <button class="btn btn-outline-secondary" type="button" id="addToWishlistBtn">
+                            <i class="fas fa-star"></i> Add to Wishlist
+                        </button>
+                    </div>
+                    <div id="searchResults" class="list-group d-none"></div>
+                    
+                    <h2 id="selectedStockName" class="mt-3"></h2>
+                    <div id="chartContainer"></div>
+                </div>
             </div>
         </div>
-    </div>
-
-    <div class="row">
-        <div class="col-md-12">
+        
+        <!-- Wishlist sidebar -->
+        <div class="col-md-3">
             <div class="card">
                 <div class="card-header">
-                    <h5 class="card-title mb-0">
-                        <i class="fas fa-chart-line"></i> 
-                        <span id="selectedStockName">Stock Chart</span>
-                    </h5>
+                    <h5 class="mb-0">My Watchlist</h5>
                 </div>
                 <div class="card-body">
-                    <div id="chartContainer" style="height: 500px;"></div>
+                    <div id="wishlistContainer" class="list-group">
+                        <!-- Wishlist items will be populated here -->
+                    </div>
                 </div>
             </div>
         </div>
@@ -38,4 +42,7 @@
 <!-- TradingView Lightweight Charts -->
 <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
 <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+
+<!-- Add Font Awesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 {% endblock %}

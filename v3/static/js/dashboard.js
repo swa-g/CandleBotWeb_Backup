@@ -3,10 +3,19 @@ document.addEventListener('DOMContentLoaded', function() {
     const searchResults = document.getElementById('searchResults');
     const selectedStockName = document.getElementById('selectedStockName');
     const chartContainer = document.getElementById('chartContainer');
+    const addToWishlistBtn = document.getElementById('addToWishlistBtn');
+    const wishlistContainer = document.getElementById('wishlistContainer');
     let chart = null;
     let candleSeries = null;
     let currentSymbol = null;
+    let currentStockName = null;
     let priceUpdateInterval = null;
+    let chartUpdateInterval = null;
+    let lastCandle = null;
+
+    // Initialize
+    initChart();
+    loadWishlist();
 
     // Format price with Indian Rupee symbol
     function formatPrice(price) {
@@ -20,6 +29,92 @@ document.addEventListener('DOMContentLoaded', function() {
     function formatPercent(percent) {
         return (percent > 0 ? '+' : '') + percent.toFixed(2) + '%';
     }
+
+    // Load wishlist
+    function loadWishlist() {
+        fetch('/get_wishlist')
+            .then(response => response.json())
+            .then(data => {
+                wishlistContainer.innerHTML = '';
+                data.forEach(item => {
+                    addWishlistItem(item);
+                });
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    // Add item to wishlist UI
+    function addWishlistItem(item) {
+        const div = document.createElement('div');
+        div.className = 'wishlist-item';
+        div.innerHTML = `
+            <div class="stock-info" onclick="loadStockData('${item.stock_symbol}')">
+                <div class="stock-symbol">${item.stock_symbol}</div>
+                <div class="stock-name">${item.stock_name}</div>
+            </div>
+            <i class="fas fa-times remove-btn" onclick="removeFromWishlist(${item.id})"></i>
+        `;
+        wishlistContainer.appendChild(div);
+    }
+
+    // Add to wishlist
+    window.addToWishlist = function() {
+        if (!currentSymbol || !currentStockName) return;
+
+        fetch('/add_to_wishlist', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                symbol: currentSymbol,
+                name: currentStockName
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                console.error('Error:', data.error);
+                return;
+            }
+            addWishlistItem(data);
+            addToWishlistBtn.classList.add('active');
+        })
+        .catch(error => console.error('Error:', error));
+    };
+
+    // Remove from wishlist
+    window.removeFromWishlist = function(itemId) {
+        fetch(`/remove_from_wishlist/${itemId}`, {
+            method: 'DELETE'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                console.error('Error:', data.error);
+                return;
+            }
+            loadWishlist();
+            if (currentSymbol) {
+                checkWishlistStatus(currentSymbol);
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    };
+
+    // Check if current stock is in wishlist
+    function checkWishlistStatus(symbol) {
+        fetch('/get_wishlist')
+            .then(response => response.json())
+            .then(data => {
+                const isInWishlist = data.some(item => item.stock_symbol === symbol);
+                addToWishlistBtn.classList.toggle('active', isInWishlist);
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    // Add click handler for wishlist button
+    addToWishlistBtn.addEventListener('click', addToWishlist);
 
     // Initialize the chart
     function initChart() {
@@ -49,9 +144,22 @@ document.addEventListener('DOMContentLoaded', function() {
                 borderColor: '#d1d4dc',
                 timeVisible: true,
                 secondsVisible: false,
+                tickMarkFormatter: (time) => {
+                    const date = new Date(time * 1000);
+                    return date.getHours().toString().padStart(2, '0') + ':' + 
+                           date.getMinutes().toString().padStart(2, '0');
+                }
             },
             localization: {
                 priceFormatter: formatPrice,
+                timeFormatter: (time) => {
+                    const date = new Date(time * 1000);
+                    return date.toLocaleTimeString('en-IN', { 
+                        hour: '2-digit', 
+                        minute: '2-digit',
+                        hour12: false 
+                    });
+                },
             },
         });
 
@@ -93,6 +201,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     tooltip.style.left = param.point.x + 'px';
                     tooltip.style.top = param.point.y + 'px';
                     tooltip.innerHTML = `
+                        <div>Time: ${new Date(param.time * 1000).toLocaleTimeString('en-IN')}</div>
                         <div>Open: ${formatPrice(data.open)}</div>
                         <div>High: ${formatPrice(data.high)}</div>
                         <div>Low: ${formatPrice(data.low)}</div>
@@ -155,8 +264,66 @@ document.addEventListener('DOMContentLoaded', function() {
         return priceInfo;
     }
 
-    // Initialize chart on load
-    initChart();
+    // Update latest candle
+    function updateLatestCandle() {
+        if (!currentSymbol) return;
+
+        fetch(`/get_latest_candle?symbol=${encodeURIComponent(currentSymbol)}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    console.error('Error:', data.error);
+                    return;
+                }
+
+                // Convert timestamp to Unix timestamp
+                const timestamp = new Date(data.time).getTime() / 1000;
+                const candleData = {
+                    ...data,
+                    time: timestamp
+                };
+
+                // Update the chart with the latest candle
+                candleSeries.update(candleData);
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    // Load stock data
+    function loadStockData(symbol, name) {
+        currentSymbol = symbol;
+        currentStockName = name;
+        selectedStockName.textContent = symbol;
+        checkWishlistStatus(symbol);
+        
+        // Clear existing intervals
+        if (priceUpdateInterval) {
+            clearInterval(priceUpdateInterval);
+        }
+        if (chartUpdateInterval) {
+            clearInterval(chartUpdateInterval);
+        }
+
+        fetch(`/get_stock_data?symbol=${encodeURIComponent(symbol)}`)
+            .then(response => response.json())
+            .then(data => {
+                // Convert timestamps to Unix timestamps
+                const formattedData = data.map(candle => ({
+                    ...candle,
+                    time: new Date(candle.time).getTime() / 1000
+                }));
+
+                candleSeries.setData(formattedData);
+                chart.timeScale().fitContent();
+
+                // Start updating price and chart
+                updateLatestPrice();
+                updateLatestCandle();
+                priceUpdateInterval = setInterval(updateLatestPrice, 5000); // Update price every 5 seconds
+                chartUpdateInterval = setInterval(updateLatestCandle, 5000); // Update chart every 5 seconds
+            })
+            .catch(error => console.error('Error:', error));
+    }
 
     // Search functionality
     let searchTimeout = null;
@@ -181,7 +348,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         item.textContent = `${stock.symbol} - ${stock.name}`;
                         item.addEventListener('click', (e) => {
                             e.preventDefault();
-                            loadStockData(stock.symbol);
+                            loadStockData(stock.symbol, stock.name);
                             searchResults.classList.add('d-none');
                             searchInput.value = `${stock.symbol} - ${stock.name}`;
                         });
@@ -192,27 +359,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 .catch(error => console.error('Error:', error));
         }, 300);
     });
-
-    // Load stock data
-    function loadStockData(symbol) {
-        selectedStockName.textContent = symbol;
-        currentSymbol = symbol;
-        
-        // Clear existing interval if any
-        if (priceUpdateInterval) {
-            clearInterval(priceUpdateInterval);
-        }
-
-        fetch(`/get_stock_data?symbol=${encodeURIComponent(symbol)}`)
-            .then(response => response.json())
-            .then(data => {
-                candleSeries.setData(data);
-                // Start updating prices
-                updateLatestPrice();
-                priceUpdateInterval = setInterval(updateLatestPrice, 60000); // Update every minute
-            })
-            .catch(error => console.error('Error:', error));
-    }
 
     // Close search results when clicking outside
     document.addEventListener('click', function(e) {
@@ -225,6 +371,9 @@ document.addEventListener('DOMContentLoaded', function() {
     window.addEventListener('beforeunload', () => {
         if (priceUpdateInterval) {
             clearInterval(priceUpdateInterval);
+        }
+        if (chartUpdateInterval) {
+            clearInterval(chartUpdateInterval);
         }
     });
 });
