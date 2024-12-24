@@ -5,6 +5,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const chartContainer = document.getElementById('chartContainer');
     const addToWishlistBtn = document.getElementById('addToWishlistBtn');
     const wishlistContainer = document.getElementById('wishlistContainer');
+    const periodSelector = document.getElementById('period-selector');
+    const intervalSelector = document.getElementById('interval-selector');
+    
     let chart = null;
     let candleSeries = null;
     let currentSymbol = null;
@@ -144,22 +147,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 borderColor: '#d1d4dc',
                 timeVisible: true,
                 secondsVisible: false,
-                tickMarkFormatter: (time) => {
-                    const date = new Date(time * 1000);
-                    return date.getHours().toString().padStart(2, '0') + ':' + 
-                           date.getMinutes().toString().padStart(2, '0');
-                }
+                tickMarkFormatter: (time) => formatTimeLabel(time),
             },
             localization: {
                 priceFormatter: formatPrice,
-                timeFormatter: (time) => {
-                    const date = new Date(time * 1000);
-                    return date.toLocaleTimeString('en-IN', { 
-                        hour: '2-digit', 
-                        minute: '2-digit',
-                        hour12: false 
-                    });
-                },
+                timeFormatter: (time) => formatTimeLabel(time),
             },
         });
 
@@ -222,6 +214,67 @@ document.addEventListener('DOMContentLoaded', function() {
         return tooltip;
     }
 
+    // Format time labels based on period and interval
+    function formatTimeLabel(time) {
+        const date = new Date(time * 1000);
+        const period = periodSelector.value;
+        const interval = intervalSelector.value;
+
+        // For intraday intervals
+        if (interval.includes('m') || interval === '1h') {
+            return date.toLocaleTimeString('en-IN', {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false
+            });
+        }
+
+        // For daily interval
+        if (interval === '1d') {
+            if (period === '5d' || period === '1mo') {
+                return date.toLocaleDateString('en-IN', {
+                    day: '2-digit',
+                    month: 'short'
+                });
+            }
+            if (period === '1y' || period === '2y') {
+                return date.toLocaleDateString('en-IN', {
+                    month: 'short',
+                    year: '2-digit'
+                });
+            }
+            if (period === '5y' || period === '10y' || period === 'max') {
+                return date.toLocaleDateString('en-IN', {
+                    year: 'numeric'
+                });
+            }
+        }
+
+        // For weekly interval
+        if (interval === '1wk') {
+            return date.toLocaleDateString('en-IN', {
+                day: '2-digit',
+                month: 'short',
+                year: period === '1y' ? undefined : '2-digit'
+            });
+        }
+
+        // For monthly interval
+        if (interval === '1mo') {
+            return date.toLocaleDateString('en-IN', {
+                month: 'short',
+                year: '2-digit'
+            });
+        }
+
+        // Default format
+        return date.toLocaleDateString('en-IN', {
+            day: '2-digit',
+            month: 'short',
+            year: '2-digit'
+        });
+    }
+
     // Update latest price
     function updateLatestPrice() {
         if (!currentSymbol) return;
@@ -264,11 +317,68 @@ document.addEventListener('DOMContentLoaded', function() {
         return priceInfo;
     }
 
-    // Update latest candle
+    // Load stock data with period and interval
+    function loadStockData(symbol, name, period = '1y', interval = '1d') {
+        currentSymbol = symbol;
+        currentStockName = name;
+        selectedStockName.textContent = symbol;
+        checkWishlistStatus(symbol);
+        
+        // Clear existing intervals
+        if (priceUpdateInterval) {
+            clearInterval(priceUpdateInterval);
+        }
+        if (chartUpdateInterval) {
+            clearInterval(chartUpdateInterval);
+        }
+
+        // Determine update interval based on selected interval
+        const updateIntervalMs = getUpdateIntervalMs(interval);
+
+        fetch(`/get_stock_data?symbol=${encodeURIComponent(symbol)}&period=${period}&interval=${interval}`)
+            .then(response => response.json())
+            .then(data => {
+                // Convert timestamps to Unix timestamps
+                const formattedData = data.map(candle => ({
+                    ...candle,
+                    time: new Date(candle.time).getTime() / 1000
+                }));
+
+                candleSeries.setData(formattedData);
+                chart.timeScale().fitContent();
+
+                // Start updating price and chart
+                updateLatestPrice();
+                updateLatestCandle();
+                
+                // Only set intervals for intraday data
+                if (interval.includes('m') || interval === '1h') {
+                    priceUpdateInterval = setInterval(updateLatestPrice, updateIntervalMs);
+                    chartUpdateInterval = setInterval(updateLatestCandle, updateIntervalMs);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    // Get appropriate update interval based on selected interval
+    function getUpdateIntervalMs(interval) {
+        switch (interval) {
+            case '1m': return 5000;  // 5 seconds
+            case '2m': return 10000; // 10 seconds
+            case '5m': return 20000; // 20 seconds
+            case '15m': return 60000; // 1 minute
+            case '30m': return 120000; // 2 minutes
+            case '1h': return 300000; // 5 minutes
+            default: return 300000;  // 5 minutes for daily and above
+        }
+    }
+
+    // Update latest candle with interval
     function updateLatestCandle() {
         if (!currentSymbol) return;
 
-        fetch(`/get_latest_candle?symbol=${encodeURIComponent(currentSymbol)}`)
+        const interval = intervalSelector.value;
+        fetch(`/get_latest_candle?symbol=${encodeURIComponent(currentSymbol)}&interval=${interval}`)
             .then(response => response.json())
             .then(data => {
                 if (data.error) {
@@ -289,41 +399,18 @@ document.addEventListener('DOMContentLoaded', function() {
             .catch(error => console.error('Error:', error));
     }
 
-    // Load stock data
-    function loadStockData(symbol, name) {
-        currentSymbol = symbol;
-        currentStockName = name;
-        selectedStockName.textContent = symbol;
-        checkWishlistStatus(symbol);
-        
-        // Clear existing intervals
-        if (priceUpdateInterval) {
-            clearInterval(priceUpdateInterval);
+    // Add event listeners for period and interval changes
+    periodSelector.addEventListener('change', function() {
+        if (currentSymbol) {
+            loadStockData(currentSymbol, currentStockName, this.value, intervalSelector.value);
         }
-        if (chartUpdateInterval) {
-            clearInterval(chartUpdateInterval);
+    });
+
+    intervalSelector.addEventListener('change', function() {
+        if (currentSymbol) {
+            loadStockData(currentSymbol, currentStockName, periodSelector.value, this.value);
         }
-
-        fetch(`/get_stock_data?symbol=${encodeURIComponent(symbol)}`)
-            .then(response => response.json())
-            .then(data => {
-                // Convert timestamps to Unix timestamps
-                const formattedData = data.map(candle => ({
-                    ...candle,
-                    time: new Date(candle.time).getTime() / 1000
-                }));
-
-                candleSeries.setData(formattedData);
-                chart.timeScale().fitContent();
-
-                // Start updating price and chart
-                updateLatestPrice();
-                updateLatestCandle();
-                priceUpdateInterval = setInterval(updateLatestPrice, 5000); // Update price every 5 seconds
-                chartUpdateInterval = setInterval(updateLatestCandle, 5000); // Update chart every 5 seconds
-            })
-            .catch(error => console.error('Error:', error));
-    }
+    });
 
     // Search functionality
     let searchTimeout = null;
@@ -348,7 +435,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         item.textContent = `${stock.symbol} - ${stock.name}`;
                         item.addEventListener('click', (e) => {
                             e.preventDefault();
-                            loadStockData(stock.symbol, stock.name);
+                            loadStockData(stock.symbol, stock.name, periodSelector.value, intervalSelector.value);
                             searchResults.classList.add('d-none');
                             searchInput.value = `${stock.symbol} - ${stock.name}`;
                         });

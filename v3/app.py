@@ -138,19 +138,36 @@ CACHE_DURATION = 60  # 60 seconds (1 minute)
 @login_required
 def get_stock_data():
     symbol = request.args.get('symbol')
+    period = request.args.get('period', '1y')  # Default to 1 year
+    interval = request.args.get('interval', '1d')  # Default to daily
+    
     if not symbol:
         return jsonify([])
     
     try:
         stock = yf.Ticker(symbol)
-        # Get intraday data for today
-        df = stock.history(period="1d", interval="1m")
+        
+        # Handle special cases for period
+        if period == 'max':
+            period = 'max'
+        elif period == 'None':
+            # For custom date range, default to 1 year for now
+            period = '1y'
+        
+        # Get historical data based on period and interval
+        df = stock.history(period=period, interval=interval)
         
         # Format data for TradingView chart
         data = []
         for index, row in df.iterrows():
+            # Format timestamp based on interval
+            if interval in ['1m', '2m', '5m', '15m', '30m', '1h']:
+                timestamp = index.strftime('%Y-%m-%d %H:%M')
+            else:
+                timestamp = index.strftime('%Y-%m-%d')
+                
             data.append({
-                'time': index.strftime('%Y-%m-%d %H:%M'),
+                'time': timestamp,
                 'open': round(float(row['Open']), 2),
                 'high': round(float(row['High']), 2),
                 'low': round(float(row['Low']), 2),
@@ -189,18 +206,24 @@ def get_latest_price():
 @login_required
 def get_latest_candle():
     symbol = request.args.get('symbol')
+    interval = request.args.get('interval', '1d')  # Get interval from request
+    
     if not symbol:
         return jsonify({'error': 'No symbol provided'})
     
     try:
         stock = yf.Ticker(symbol)
-        # Get the latest minute's data
-        df = stock.history(period="1d", interval="1m").tail(1)
+        # Get the latest data point based on interval
+        df = stock.history(period='1d', interval=interval).tail(1)
         
         if len(df) > 0:
             latest = df.iloc[-1]
-            # Format timestamp for intraday data
-            timestamp = latest.name.strftime('%Y-%m-%d %H:%M')
+            # Format timestamp based on interval
+            if interval in ['1m', '2m', '5m', '15m', '30m', '1h']:
+                timestamp = latest.name.strftime('%Y-%m-%d %H:%M')
+            else:
+                timestamp = latest.name.strftime('%Y-%m-%d')
+                
             data = {
                 'time': timestamp,
                 'open': round(float(latest['Open']), 2),
